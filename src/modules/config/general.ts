@@ -14,6 +14,7 @@ interface IConfig {
         DB_PASS: string;
         DB_PORT: number;
         PORT: number;
+        NODE_ENV: string;
     };
 }
 const generalConfig: IConfig = {
@@ -30,6 +31,7 @@ const generalConfig: IConfig = {
         DB_PASS: process.env.DB_PASS || "",
         DB_PORT: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
         PORT: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
+        NODE_ENV: process.env.NODE_ENV || "development",
     },
 };
 

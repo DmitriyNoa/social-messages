@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run lint && node src/index.js",
-    "dev": "ENV=DEVELOPMENT nodemon src/index.ts",
+    "dev": "NODE_ENV=DEVELOPMENT nodemon src/index.ts",
     "lint": "./node_modules/.bin/tslint ./src/*",
     "lint-fix": "./node_modules/.bin/tslint ./src/* --fix",
     "commit": "npx git-cz",

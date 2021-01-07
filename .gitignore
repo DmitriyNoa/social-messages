@@ -110,3 +110,7 @@ dist
 
 # TernJS port file
 .tern-port
+server.crt
+server.csr
+server.key
+server.key.org
