@@ -1,17 +1,17 @@
 "use strict";
 
-import fs from "fs";
-import path from "path";
-import {SignOptions, sign, verify, VerifyOptions} from "jsonwebtoken";
+import {readFileSync} from "fs";
+import {join} from "path";
+import { SignOptions, sign, verify, VerifyOptions } from "jsonwebtoken";
 import { generalConfig } from "../../config/general";
 import { getDBInstance } from "../../db";
 import { compare, genSalt, hash } from "bcrypt";
 import { AppError } from "../../common/utils/error-handler";
 import {IUser} from "../../users/interfaces/user";
-const privateKeyPath = path.join(process.cwd(), generalConfig.env.PRIVATE_KEY_PATH);
-const publicKeyPath = path.join(process.cwd(),  generalConfig.env.PUBLIC_KEY_PATH);
-const sshDeffaultPrivateKey = fs.readFileSync(privateKeyPath, "utf-8");
-const sshDefaultPublicKey = fs.readFileSync(publicKeyPath, "utf-8");
+const privateKeyPath = join(process.cwd(), generalConfig.env.PRIVATE_KEY_PATH);
+const publicKeyPath = join(process.cwd(),  generalConfig.env.PUBLIC_KEY_PATH);
+const sshDefaultPrivateKey = readFileSync(privateKeyPath, "utf-8");
+const sshDefaultPublicKey = readFileSync(publicKeyPath, "utf-8");
 
 class AuthenticationService {
 
@@ -28,7 +28,7 @@ class AuthenticationService {
     };
 
     constructor(public userModel?: any,
-                private readonly sshPrivateKey: string = sshDeffaultPrivateKey,
+                private readonly sshPrivateKey: string = sshDefaultPrivateKey,
                 private readonly sshPublicKey: string = sshDefaultPublicKey) {
         this.sshPrivateKey = sshPrivateKey;
         this.sshPublicKey = sshPublicKey;
@@ -52,25 +52,23 @@ class AuthenticationService {
                                                                   last_name,
                                                                   password,
                                                                   email FROM users WHERE email=$1`, [email]);
-
         if (user.rows.length === 0) {
-            return Promise.reject(new AppError(401, "No User found"));
+            return Promise.reject(new AppError(401, "No user found"));
         }
         const userData = user.rows[0];
-        await this.checkUserCredentials(userData, password);
+        const isValid = await this.checkUserCredentials(userData, password);
+
+        if (!isValid) {
+            return Promise.reject(new AppError(401, "invalid password", null));
+        }
+
         delete userData.password;
 
         return this.signToken(userData);
     }
 
-    public async checkUserCredentials(user: IUser, password: string) {
-        const correctPassword = await this.isSamePassword(password, user.password);
-
-        if(!correctPassword) {
-            return Promise.reject(new AppError(401, "invalid password", null));
-        }
-
-        return correctPassword;
+    public async checkUserCredentials(user: IUser, password: string): Promise<boolean> {
+        return this.isSamePassword(password, user.password);
     }
 
     public signToken(payload: any) {
@@ -84,10 +82,6 @@ class AuthenticationService {
     }
 
     private async isSamePassword(password: string, encrypted: string): Promise<boolean> {
-        if (!encrypted || !password) {
-            return Promise.reject(false);
-        }
-
         return compare(password, encrypted);
     }
 

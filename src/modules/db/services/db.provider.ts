@@ -1,6 +1,6 @@
 "use strict";
 
-import {DbService} from "./db.service";
+import { DbService } from "./db.service";
 
 let DBInstance: any;
 

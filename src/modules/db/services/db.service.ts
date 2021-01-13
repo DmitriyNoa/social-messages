@@ -4,8 +4,8 @@ import {Pool} from "pg";
 import {generalConfig} from "../../config/general";
 
 class DbService {
-    private client: any;
     public pool: Pool;
+    private client: any;
     constructor() {
         this.pool = new Pool({
             user: generalConfig.env.DB_USER,
@@ -25,4 +25,4 @@ class DbService {
 
 export {
     DbService,
-}
+};
